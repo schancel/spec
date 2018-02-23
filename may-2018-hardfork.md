@@ -8,6 +8,7 @@ When the median time past[1] of the most recent 11 blocks (MTP-11) is greater th
 
 * Blocksize increase to 32 MB
 * Re-enabling of several opcodes
+* Adding several new opcodes
 
 The following are not consensus changes, but are recommended changes for Bitcoin Cash implementations:
 
@@ -20,7 +21,9 @@ The blocksize hard capacity limit will be increased to 32MB (32000000 bytes).
 
 ## OpCodes
 
-Several opcodes will be re-enabled per [may-2018-opcodes](may-2018-opcodes.md)
+Several opcodes will be re-enabled or added per [may-2018-opcodes](may-2018-opcodes.md)
+
+OP_DATASIGVERIFY will be added as per [OP_DATASIGVERIFY Specification](https://github.com/gandrewstone/BitcoinUnlimited/blob/op_datasigverify/doc/opdatasigverify.md)
 
 ## Automatic Replay Protection
 
