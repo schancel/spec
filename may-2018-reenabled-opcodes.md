@@ -1,59 +1,30 @@
-# Restore disabled script op codes
+# Restore disabled script opcodes, May 2018
 
-Version 0.1, 2018-01-19 - DRAFT FOR DISCUSSION
-
-## Draft discussion notes
-
-For the purposes of discussion of this draft additional notes are contained throughout with the heading *DRAFT DISCCUSION*.  These are
-intended to be removed from the finalalized version of this document.
-
-Optional rules are denoted by *RULE OPTION* where it is intended one the presented options will be adopted following consensus within
-the workgroup.
-
+Version 0.2, 2018-02-28
 
 ## Introduction
 
-This document describes proposed requirements for reactivating several script op codes.  In 2011 the discovery of
-two serious bugs in `OP_LSHIFT` and `OP_RETURN` prompted the deactivation of these and 13 additional op codes.
-The following list of disabled op codes is broken down by category.
+In 2010 and 2011 the discovery of serious bugs prompted the deactivation of many opcodes in the Bitcoin script language. 
+It is our intention to restore the functionality that some of these opcodes provided in Bitcoin Cash. Rather than simply
+re-enable the opcodes, the functionality that they provide has been re-examined and in some cases the opcodes have been
+re-designed or new opcodes have been added to address specific issues.
 
-##### Splice operations
+This document contains the specifications for the opcodes that are to be added in the May 2018 protocol upgrade. We 
+anticipate that additional opcodes will be proposed for the November 2018, or later, protocol upgrades.
 
-|Word       |OpCode |Hex |Input         |Output  | Description                                                      |
-|-----------|-------|----|--------------|--------|------------------------------------------------------------------|
-|OP_CAT     |126    |0x7e|x1 x2         |out     |Concatenates two byte strings                                     |
-|OP_SUBSTR  |127    |0x7f|in begin size |out     |Returns a section of a string                                     |
-|OP_LEFT    |128    |0x80|in size       |out     |Keeps only characters left of the specified point in the string   |
-|OP_RIGHT   |129    |0x81|in size       |out     |Keeps only characters right of the specified point in the string  |
-
-
-##### Bitwise logic
+The opcodes that are to be added are:
 
 |Word       |OpCode |Hex |Input         |Output  | Description                                                      |
 |-----------|-------|----|--------------|--------|------------------------------------------------------------------|
-|OP_INVERT  |131    |0x83|in            |out     |Flips all bits of the input                                       |
-|OP_AND     |132    |0x84|x1 x2         |out     |Boolean *AND* beteween each bit of the inputs                     |
-|OP_OR      |133    |0x85|x1 x2         |out     |Boolean *OR* beteween each bit of the inputs                      |
-|OP_XOR     |134    |0x86|x1 x2         |out     |Boolean *EXCLUSIVE OR* beteween each bit of the inputs            |
-
-
-##### Arithmetic
-
-|Word       |OpCode |Hex |Input         |Output  | Description                                                      |
-|-----------|-------|----|--------------|--------|------------------------------------------------------------------|
-|OP_2MUL    |141    |0x8d|in            |out     |The input is multiplied by 2                                      |
-|OP_2DIV    |142    |0x8e|in            |out     |The input is divided by 2                                         |
-|OP_MUL     |149    |0x95|a b           |out     |*a* is multiplied by *b*                                          |
+|OP_CAT     |126    |0x7e|x1 x2         |out     |Concatenates two byte arrays                                      |
+|OP_SPLIT   |127    |0x7f|x n           |x1 x2   |Split byte array *x* at position *n*                              |
+|OP_AND     |132    |0x84|x1 x2         |out     |Boolean *AND* between each bit of the inputs                      |
+|OP_OR      |133    |0x85|x1 x2         |out     |Boolean *OR* between each bit of the inputs                       |
+|OP_XOR     |134    |0x86|x1 x2         |out     |Boolean *EXCLUSIVE OR* between each bit of the inputs             |
 |OP_DIV     |150    |0x96|a b           |out     |*a* is divided by *b*                                             |
 |OP_MOD     |151    |0x97|a b           |out     |return the remainder after *a* is divided by *b*                  |
-|OP_LSHIFT  |152    |0x98|a b           |out     |shifts *a* left by *b* bits, preserving sign                      |
-|OP_RSHIFT  |152    |0x99|a b           |out     |shifts *a* right by *b* bits, preserving sign                     |
-
-
-### Proposed op codes to reenable
-
-It is proposed to reintroduce these op codes (or equivalent functionality) in a staged process.  The first stage being
-to enable a limited subset in the May 2018 hard fork. 
+|OP_NUM2BIN |128    |0x80|a b           |out     |convert numeric *a* into byte array of length *b*                 |
+|OP_BIN2NUM |129    |0x81|x             |out     |convert byte array *x* into numeric                               |
 
 Splice operations: `OP_CAT`, `OP_SPLIT`**
 
@@ -67,8 +38,8 @@ New operations:
 
 Further discussion of the purpose of these new operations can be found below under *bitwise operations*.
 
-** A new operation, `OP_SPLIT`, is proposed as a replacement for `OP_SUBSTR`, `OP_LEFT`and `OP_RIGHT`. The original operations 
-can be implemented with varying combinations of `OP_SPLIT`, `OP_SWAP` and `OP_DROP`.
+** A new operation, `OP_SPLIT`, has been designed as a replacement for `OP_SUBSTR`, `OP_LEFT`and `OP_RIGHT`. 
+The original operations can be implemented with varying combinations of `OP_SPLIT`, `OP_SWAP` and `OP_DROP`.
 
 
 ## <a name="data-types"></a>Script data types
@@ -85,9 +56,9 @@ The numeric type has specific limitations:
         to the left.
 4. Negative zero is not allowed.
     
-The newly proposed opcode `x OP_BIN2NUM -> out` can be used convert a binary array into a canonical number where required.
+The new opcode `x OP_BIN2NUM -> out` can be used convert a binary array into a canonical number where required.
 
-The newly proposed opcode `x n OP_NUM2BIN` can be used to convert a number into a zero padded binary array of length `n` 
+The new opcode `x n OP_NUM2BIN` can be used to convert a number into a zero padded binary array of length `n` 
 whilst preserving the sign bit.
 
 **Endian notation**
@@ -96,13 +67,13 @@ For human readability where hex strings are presented in this document big endia
 decimal 256, not decimal 1.
 
 
-## Risks and philosophical approach
+## Risks and philosophical approach during design
 
 In general the approach taken is a minimalist one in order limit edge cases as much as possible.  Where it is possible
-for a primitive op code used in conjuction with existing op codes to be combined to produce several more complex operations that is
+for a primitive op code used in conjunction with existing op codes to be combined to produce several more complex operations that is
 preferred over a set of more complex op codes.  Input conditions that create ambiguous or undefined behaviour should fail fast.  
 
-Each op code should be examined for the following risk conditions and mitigating behaviour defined explcitly:
+Each op code should be examined for the following risk conditions and mitigating behaviour defined explicitly:
 * Operand byte length mismatch.  Where it would be normally expected that two operands would be of matching byte lengths
 the resultant behaviour should be defined.
 * Signed integer.  Whether signed integers are permitted operands and whether any special handling is required.
@@ -124,7 +95,7 @@ last operand.  e.g. `x1 x2 OP_CAT` --> `x2` is the top stack item and `x1` is th
 
 ## Specification
 
-Global failure conditions apply to all operations. These failure conditions must be checked by the implementation when 
+Global conditions apply to all operations. These conditions must be checked by the implementation when 
 it is possible that they will occur:
 * for all e : elements on the stack, `0 <= len(e) <= MAX_SCRIPT_ELEMENT_SIZE`
 * for each operator, the required number of operands are present on the stack when the operand is executed
@@ -153,9 +124,9 @@ Examples:
 * `Ox11 0x2233 OP_CAT -> 0x112233`
     
 The operator must fail if:
-* `0 <= len(out) <= MAX_SCRIPT_ELEMENT_SIZE`. The operation cannot output elements that violate the constraint on the element size.
+* `len(out) > MAX_SCRIPT_ELEMENT_SIZE`. The operation cannot output elements that violate the constraint on the element size.
 
-Note that the concatentation of a zero length operand is valid.
+Note that the concatenation of a zero length operand is valid.
 
 Impact of successful execution:
 * stack memory use is constant
@@ -222,7 +193,7 @@ Unit tests:
 
 The bitwise logic operators expect 'array of bytes' operands. The operands must be the same length. 
 * In the case of 'array of bytes' operands `OP_CAT` can be used to pad a shorter byte array to an appropriate length.
-* In the case of 'array of bytes' operands there the length of operands is not known until runtime an array of 0x00 bytes 
+* In the case of 'array of bytes' operands where the length of operands is not known until runtime an array of 0x00 bytes 
 (for use with `OP_CAT`) can be produced using `OP_0 n OP_NUM2BIN`
 * In the case of numeric operands `x n OP_NUM2BIN` can be used to pad a number to length `n` whilst preserving the sign bit.
 
@@ -331,7 +302,8 @@ Unit tests:
 1. `a b OP_DIV -> failure` where `!isnum(a)` or `!isnum(b)`. Both operands must be valid numbers
 2. `a 0 OP_DIV -> failure`. Division by positive zero (all sizes), negative zero (all sizes), `OP_0` 
 3. `a b OP_DIV -> out` where `a < 0` then the result must be negative or any form of zero. 
-4. check valid results for operands of different lengths `1..4`
+4. `27 7 OP_DIV -> 3`, `27 -7 OP_DIV -> -3`, `-27 7 OP_DIV -> -3`, `-27 -7 OP_DIV -> 3`. Check negative operands.
+5. check valid results for operands of different lengths `1..4`
     
 ### OP_MOD
 
@@ -355,7 +327,8 @@ Impact of successful execution:
 Unit tests:
 1. `a b OP_MOD -> failure` where `!isnum(a)` or `!isnum(b)`. Both operands must be valid numbers.
 2. `a 0 OP_MOD -> failure`. Division by positive zero (all sizes), negative zero (all sizes), `OP_0` 
-4. check valid results for operands of different lengths `1..4`
+4. `27 7 OP_MOD -> 6`, `27 -7 OP_MOD -> 6`, `-27 7 OP_MOD -> -6`, `-27 -7 OP_MOD -> -6`. Check negative operands. *Pay attention to sign*.
+5. check valid results for operands of different lengths `1..4`
 
 ## New operations
 
@@ -371,6 +344,9 @@ Convert the binary array into a valid numeric value, including minimal encoding.
     `x1 OP_BIN2NUM -> n`
 
 See also `OP_NUM2BIN`.
+
+Notes:
+* if `x1` is any form of zero, including negative zero, then `OP_0` must be the result
     
 Examples:
 * `0x0000000002 OP_BIN2NUM -> 0x02`
@@ -384,6 +360,8 @@ Unit tests:
 1. `0x00 OP_BIN2NUM -> OP_0`. Arrays of zero bytes, of various lengths, should produce an OP_0 (zero length array). 
 2. `0x00000000000001 OP_BIN2NUM -> 0x01`. A large binary array, whose numeric value would fit in the numeric type, is a valid operand.
 1. `0x80000000000001 OP_BIN2NUM -> 0x81`. Same as above, for negative values.  
+1. `0x80 OP_BIN2NUM -> OP_0`. Negative zero, in binary bytes, should produce zero.
+1. `0x80000000000000 OP_BIN2NUM -> OP_0`. Large negative zero, in binary bytes, should produce zero.
  
 ### OP_NUM2BIN
 
@@ -406,7 +384,8 @@ Examples:
 
 The operator must fail if:
 1. `n` or `m` are not valid numeric values.
-2. `m < len(n)`. `n` is a valid numeric value, therefore it is already in minimal representation. 
+2. `m < len(n)`. `n` is a valid numeric value, therefore it must already be in minimal representation, so it cannot fit into
+   a byte array which is smaller than the length of `n`. 
 3. `m > MAX_SCRIPT_ELEMENT_SIZE`. The result would be too large.
 
 Unit tests:
