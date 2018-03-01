@@ -67,13 +67,13 @@ For human readability where hex strings are presented in this document big endia
 decimal 256, not decimal 1.
 
 
-## Risks and Philosophical Approach During Design
+## Risks and philosophical approach during design
 
 In general the approach taken is a minimalist one in order limit edge cases as much as possible.  Where it is possible
-for a primitive op code used in conjuction with existing op codes to be combined to produce several more complex operations that is
+for a primitive op code used in conjunction with existing op codes to be combined to produce several more complex operations that is
 preferred over a set of more complex op codes.  Input conditions that create ambiguous or undefined behaviour should fail fast.  
 
-Each op code should be examined for the following risk conditions and mitigating behaviour defined explcitly:
+Each op code should be examined for the following risk conditions and mitigating behaviour defined explicitly:
 * Operand byte length mismatch.  Where it would be normally expected that two operands would be of matching byte lengths
 the resultant behaviour should be defined.
 * Signed integer.  Whether signed integers are permitted operands and whether any special handling is required.
@@ -126,7 +126,7 @@ Examples:
 The operator must fail if:
 * `len(out) > MAX_SCRIPT_ELEMENT_SIZE`. The operation cannot output elements that violate the constraint on the element size.
 
-Note that the concatentation of a zero length operand is valid.
+Note that the concatenation of a zero length operand is valid.
 
 Impact of successful execution:
 * stack memory use is constant
@@ -302,7 +302,7 @@ Unit tests:
 1. `a b OP_DIV -> failure` where `!isnum(a)` or `!isnum(b)`. Both operands must be valid numbers
 2. `a 0 OP_DIV -> failure`. Division by positive zero (all sizes), negative zero (all sizes), `OP_0` 
 3. `a b OP_DIV -> out` where `a < 0` then the result must be negative or any form of zero. 
-4. TODO: valid examples - negative, positive, etc
+4. `27 7 OP_DIV -> 3`, `27 -7 OP_DIV -> -3`, `-27 7 OP_DIV -> -3`, `-27 -7 OP_DIV -> 3`. Check negative operands.
 5. check valid results for operands of different lengths `1..4`
     
 ### OP_MOD
@@ -327,7 +327,7 @@ Impact of successful execution:
 Unit tests:
 1. `a b OP_MOD -> failure` where `!isnum(a)` or `!isnum(b)`. Both operands must be valid numbers.
 2. `a 0 OP_MOD -> failure`. Division by positive zero (all sizes), negative zero (all sizes), `OP_0` 
-4. TODO: valid examples - negative, positive, etc
+4. `27 7 OP_MOD -> 6`, `27 -7 OP_MOD -> 6`, `-27 7 OP_MOD -> -6`, `-27 -7 OP_MOD -> -6`. Check negative operands. *Pay attention to sign*.
 5. check valid results for operands of different lengths `1..4`
 
 ## New operations
@@ -344,6 +344,9 @@ Convert the binary array into a valid numeric value, including minimal encoding.
     `x1 OP_BIN2NUM -> n`
 
 See also `OP_NUM2BIN`.
+
+Notes:
+* if `x1` is any form of zero, including negative zero, then `OP_0` must be the result
     
 Examples:
 * `0x0000000002 OP_BIN2NUM -> 0x02`
@@ -357,7 +360,8 @@ Unit tests:
 1. `0x00 OP_BIN2NUM -> OP_0`. Arrays of zero bytes, of various lengths, should produce an OP_0 (zero length array). 
 2. `0x00000000000001 OP_BIN2NUM -> 0x01`. A large binary array, whose numeric value would fit in the numeric type, is a valid operand.
 1. `0x80000000000001 OP_BIN2NUM -> 0x81`. Same as above, for negative values.  
-1. TODO: example with negative zero, also include note above
+1. `0x80 OP_BIN2NUM -> OP_0`. Negative zero, in binary bytes, should produce zero.
+1. `0x80000000000000 OP_BIN2NUM -> OP_0`. Large negative zero, in binary bytes, should produce zero.
  
 ### OP_NUM2BIN
 
