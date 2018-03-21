@@ -52,7 +52,7 @@ The numeric value type has specific limitations:
 1. The used encoding is little endian with an explicit sign bit (the highest bit of the last byte).
 2. They cannot exceed 4 bytes in length.
 3. They must be encoded using the shortest possible byte length (no zero padding)
-    3. There is one exception to rule 3: if there is more than one byte and the most significant bit of the 
+  1. There is one exception to rule 3: if there is more than one byte and the most significant bit of the 
         second-most-significant-byte is set it would conflict with the sign bit. In this case a single 0x00 or 0x80 byte is allowed
         to the left.
 4. Zero is encoded as a zero length byte sequence. Single byte positive or negative zero (0x00 or 0x80) are not allowed.
