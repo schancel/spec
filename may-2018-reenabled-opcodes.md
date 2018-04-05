@@ -345,6 +345,10 @@ Examples:
 The operator must fail if:
 1. the numeric value is out of the range of acceptable numeric values (currently size is limited to 4 bytes)
 
+Impact of successful execution:
+* stack memory use is equal or less than before. Minimal encoding of the byte sequence can produce a result which is shorter.
+* the number of elements on the stack remains constant
+
 Unit tests:
 1. `a OP_BIN2NUM -> failure`, when `a` is a byte sequence whose numeric value is too large to fit into the numeric value 
     type, for both positive and negative values. 
@@ -382,6 +386,10 @@ The operator must fail if:
 2. `m < len(n)`. `n` is a numeric value, therefore it must already be in minimal representation, so it cannot fit into
    a byte sequence which is smaller than the length of `n`. 
 3. `m > MAX_SCRIPT_ELEMENT_SIZE`. The result would be too large.
+
+Impact of successful execution:
+* stack memory use will be increased by `m - len(n) - len(m)`, maximum increase is when `m = MAX_SCRIPT_ELEMENT_SIZE`
+* number of elements on stack is reduced by one
 
 Unit tests:
 1. `n m OP_NUM2BIN -> failure` where `!isnum(n)` or `!isnum(m)`. Both operands must be numeric values.
