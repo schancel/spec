@@ -392,19 +392,17 @@ Unit tests:
 
 ## Reference implementation
 
-OP_AND, OP_OR, OP_XOR: https://reviews.bitcoinabc.org/D1090
+* OP_AND, OP_OR, OP_XOR: https://reviews.bitcoinabc.org/D1211
 
-OP_DIV: https://reviews.bitcoinabc.org/D1093
+* OP_DIV and OP_MOD: https://reviews.bitcoinabc.org/D1212
 
-OP_MOD: https://reviews.bitcoinabc.org/D1095
+* OP_CAT: https://reviews.bitcoinabc.org/D1227
 
-OP_CAT: https://reviews.bitcoinabc.org/D1097
+* OP_SPLIT: https://reviews.bitcoinabc.org/D1228
 
-OP_SPLIT: https://reviews.bitcoinabc.org/D1099
+* OP_BIN2NUM: https://reviews.bitcoinabc.org/D1220
 
-OP_BIN2NUM: https://reviews.bitcoinabc.org/D1101
-
-OP_NUM2BIN: https://reviews.bitcoinabc.org/D1103
+* OP_NUM2BIN: https://reviews.bitcoinabc.org/D1222
 
 
 ## References
