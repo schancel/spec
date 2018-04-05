@@ -1,6 +1,6 @@
 # Restore disabled script opcodes, May 2018
 
-Version 0.2, 2018-02-28
+Version 0.3, 2018-04-05
 
 ## Introduction
 
