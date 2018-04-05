@@ -68,25 +68,6 @@ For human readability where hex strings are presented in this document big endia
 decimal 256, not decimal 1.
 
 
-## Risks and philosophical approach during design
-
-In general the approach taken is a minimalist one in order limit edge cases as much as possible.  Where it is possible
-for a primitive op code used in conjunction with existing op codes to be combined to produce several more complex 
-operations that is preferred over a set of more complex op codes.  Input conditions that create ambiguous or undefined 
-behaviour should fail fast.  
-
-Each op code should be examined for the following risk conditions and mitigating behaviour defined explicitly:
-* Operand byte length mismatch.  Where it would be normally expected that two operands would be of matching byte lengths
-  the resultant behaviour should be defined.
-* Signed integer.  Whether signed integers are permitted operands and whether any special handling is required.
-* Stack size impact.  Both number of elements and total size of elements. 
-* Overflows.  Defined behaviour in the instance that result of the operation exceeds MAX_SCRIPT_ELEMENT_SIZE
-* Empty byte sequence operands.  Whether empty byte sequences should be allowed as a representation of zero.
-* Empty byte sequence output.  Note that an operation that outputs an empty byte sequence has effectively pushed `false` 
-  onto the stack. If this is the last operation in a script or if a conditional operator immediately follows the script 
-  author must consider this possibility. This is currently the case for many existing op codes however so it is 
-  consistent to continue with allowing this behaviour.
-
 ## Definitions
 
 * *Stack memory use*. This is the sum of the size of the elements on the stack. It gives an indication of impact on 
