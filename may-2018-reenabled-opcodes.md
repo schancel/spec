@@ -329,7 +329,7 @@ Unit tests:
     Opcode (decimal): 128
     Opcode (hex): 0x80
 
-Convert the byte sequence into a numeric value, including minimal encoding.
+Convert the byte sequence into a numeric value, including minimal encoding. The byte sequence must encode the value in little-endian encoding.
 
     `x1 OP_BIN2NUM -> n`
 
@@ -339,8 +339,8 @@ Notes:
 * if `x1` is any form of zero, including negative zero, then `OP_0` must be the result
     
 Examples:
-* `0x0000000002 OP_BIN2NUM -> 0x02`
-* `0x800005 OP_BIN2NUM -> 0x85`
+* `{0x02, 0x00, 0x00, 0x00, 0x00} OP_BIN2NUM -> 2`. `0x0200000000` in little-endian encoding has value 2.
+* `{0x05, 0x00, 0x80} OP_BIN2NUM -> -5` - `0x050080` in little-endian encoding has value -5.
 
 The operator must fail if:
 1. the numeric value is out of the range of acceptable numeric values (currently size is limited to 4 bytes)
@@ -352,14 +352,14 @@ Impact of successful execution:
 Unit tests:
 1. `a OP_BIN2NUM -> failure`, when `a` is a byte sequence whose numeric value is too large to fit into the numeric value 
     type, for both positive and negative values. 
-2. `0x00 OP_BIN2NUM -> OP_0`. Byte sequences, of various lengths, consisting only of zeros should produce an OP_0 (zero
+2. `{0x00} OP_BIN2NUM -> OP_0`. Byte sequences, of various lengths, consisting only of zeros should produce an OP_0 (zero
     length array). 
-3. `0x00000000000001 OP_BIN2NUM -> 0x01`. A large byte sequence, whose numeric value would fit in the numeric value
+3. `{0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} OP_BIN2NUM -> 1`. A large byte sequence, whose numeric value would fit in the numeric value
     type, is a valid operand.
 4. The same test as above, where the length of the input byte sequence is equal to MAX_SCRIPT_ELEMENT_SIZE.
-5. `0x80000000000001 OP_BIN2NUM -> 0x81`. Same as above, for negative values.
-6. `0x80 OP_BIN2NUM -> OP_0`. Negative zero, in a byte sequence, should produce zero.
-7. `0x80000000000000 OP_BIN2NUM -> OP_0`. Large negative zero, in a byte sequence, should produce zero.
+5. `{0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80} OP_BIN2NUM -> -1`. Same as above, for negative values.
+6. `{0x80} OP_BIN2NUM -> OP_0`. Negative zero, in a byte sequence, should produce zero.
+7. `{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80} OP_BIN2NUM -> OP_0`. Large negative zero, in a byte sequence, should produce zero.
 8. other valid parameters with various results
  
 ### OP_NUM2BIN
