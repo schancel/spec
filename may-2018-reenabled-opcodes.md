@@ -107,8 +107,7 @@ Concatenates two operands.
 Examples:
 * `Ox11 0x2233 OP_CAT -> 0x112233`
     
-The operator must fail if:
-* `len(out) > MAX_SCRIPT_ELEMENT_SIZE`. The operation cannot output elements that violate the constraint on the element size.
+The operator must fail if `len(out) > MAX_SCRIPT_ELEMENT_SIZE`. The operation cannot output elements that violate the constraint on the element size.
 
 Note that the concatenation of a zero length operand is valid.
 
@@ -176,6 +175,7 @@ Unit tests:
 * `x 0 OP_SPLIT -> OP_0 x`
 * `x len(x) OP_SPLIT -> x OP_0`
 * `x (len(x) + 1) OP_SPLIT -> FAIL`
+* include successful unit tests
 
 ## Bitwise logic
 
@@ -196,7 +196,7 @@ Boolean *and* between each bit in the operands.
 	x1 x2 OP_AND -> out
 
 Notes:
-* where `len(x1) == 0 == len(x2)` the output will be an empty array.
+* where `len(x1) == 0` and `len(x2) == 0` the output will be an empty array.
 
 The operator must fail if:
 1. `len(x1) != len(x2)`. The two operands must be the same size.
@@ -259,7 +259,7 @@ See [data types](#data-types) for more information.
 
 **Floor division**
 
-Note: that when considering integer division and modulo operations with negative operands the rules applied in the C language and most
+Note that when considering integer division and modulo operations with negative operands, the rules applied in the C language and most
 languages (with Python being a notable exception) differ from the strict mathematical definition.  Script follows the C language set of
 rules.  Namely:
 1. Non-integer quotients are rounded towards zero
@@ -290,9 +290,9 @@ Impact of successful execution:
 Unit tests:
 1. `a b OP_DIV -> failure` where `!isnum(a)` or `!isnum(b)`. Both operands must be numeric values
 2. `a 0 OP_DIV -> failure`. Division by positive zero (all sizes), negative zero (all sizes), `OP_0` 
-4. `27 7 OP_DIV -> 3`, `27 -7 OP_DIV -> -3`, `-27 7 OP_DIV -> -3`, `-27 -7 OP_DIV -> 3`. Check negative operands. 
+3. `27 7 OP_DIV -> 3`, `27 -7 OP_DIV -> -3`, `-27 7 OP_DIV -> -3`, `-27 -7 OP_DIV -> 3`. Check negative operands.
   *Pay attention to sign*.
-5. check valid results for operands of different lengths `0..4`
+4. check valid results for operands of different lengths `0..4`
     
 ### OP_MOD
 
@@ -316,9 +316,9 @@ Impact of successful execution:
 Unit tests:
 1. `a b OP_MOD -> failure` where `!isnum(a)` or `!isnum(b)`. Both operands must be numeric values.
 2. `a 0 OP_MOD -> failure`. Division by positive zero (all sizes), negative zero (all sizes), `OP_0` 
-4. `27 7 OP_MOD -> 6`, `27 -7 OP_MOD -> 6`, `-27 7 OP_MOD -> -6`, `-27 -7 OP_MOD -> -6`. Check negative operands. 
+3. `27 7 OP_MOD -> 6`, `27 -7 OP_MOD -> 6`, `-27 7 OP_MOD -> -6`, `-27 -7 OP_MOD -> -6`. Check negative operands.
   *Pay attention to sign*.
-5. check valid results for operands of different lengths `0..4`
+4. check valid results for operands of different lengths `0..4` and returning result zero
 
 ## New operations
 
@@ -348,13 +348,15 @@ The operator must fail if:
 Unit tests:
 1. `a OP_BIN2NUM -> failure`, when `a` is a byte sequence whose numeric value is too large to fit into the numeric value 
     type, for both positive and negative values. 
-1. `0x00 OP_BIN2NUM -> OP_0`. Byte sequences, of various lengths, consisting only of zeros should produce an OP_0 (zero 
+2. `0x00 OP_BIN2NUM -> OP_0`. Byte sequences, of various lengths, consisting only of zeros should produce an OP_0 (zero
     length array). 
-2. `0x00000000000001 OP_BIN2NUM -> 0x01`. A large byte sequence, whose numeric value would fit in the numeric value 
+3. `0x00000000000001 OP_BIN2NUM -> 0x01`. A large byte sequence, whose numeric value would fit in the numeric value
     type, is a valid operand.
-1. `0x80000000000001 OP_BIN2NUM -> 0x81`. Same as above, for negative values.  
-1. `0x80 OP_BIN2NUM -> OP_0`. Negative zero, in a byte sequence, should produce zero.
-1. `0x80000000000000 OP_BIN2NUM -> OP_0`. Large negative zero, in a byte sequence, should produce zero.
+4. The same test as above, where the length of the input byte sequence is equal to MAX_SCRIPT_ELEMENT_SIZE.
+5. `0x80000000000001 OP_BIN2NUM -> 0x81`. Same as above, for negative values.
+6. `0x80 OP_BIN2NUM -> OP_0`. Negative zero, in a byte sequence, should produce zero.
+7. `0x80000000000000 OP_BIN2NUM -> OP_0`. Large negative zero, in a byte sequence, should produce zero.
+8. other valid parameters with various results
  
 ### OP_NUM2BIN
 
@@ -386,6 +388,7 @@ Unit tests:
 2. `0x0100 1 OP_NUM2BIN -> failure`. Trying to produce a byte sequence which is smaller than the minimum size needed to 
    contain the numeric value.
 3. `0x01 (MAX_SCRIPT_ELEMENT_SIZE+1) OP_NUM2BIN -> failure`. Trying to produce an array which is too large.
+4. other valid parameters with various results
 
 ## Reference implementation
 
