@@ -48,6 +48,9 @@ It should be noted that in script operation data values on the stack are interpr
 or numeric values.  **All data on the stack is interpreted as a byte sequence unless specifically stated as being interpreted 
 as a numeric value.**
 
+For accuracy in this specification, a byte sequences is presented as {0x01, 0x02, 0x03}. This sequence is three bytes long, it begins
+with a byte of value 1 and ends with a byte of value 3.
+
 The numeric value type has specific limitations:
 1. The used encoding is little endian with an explicit sign bit (the highest bit of the last byte).
 2. They cannot exceed 4 bytes in length.
@@ -61,12 +64,6 @@ The new opcode `x OP_BIN2NUM -> out` can be used convert a byte sequence into a 
 
 The new opcode `x n OP_NUM2BIN` can be used to convert a numeric value into a zero padded byte sequence of length `n` 
 whilst preserving the sign bit.
-
-**Endian notation**
-
-For human readability where hex strings are presented in this document big endian notation is used.  That is: 0x0100 represents 
-decimal 256, not decimal 1.
-
 
 ## Definitions
 
@@ -105,7 +102,7 @@ Concatenates two operands.
     x1 x2 OP_CAT -> out
         
 Examples:
-* `Ox11 0x2233 OP_CAT -> 0x112233`
+* `{Ox11} {0x22, 0x33} OP_CAT -> 0x112233`
     
 The operator must fail if `len(out) > MAX_SCRIPT_ELEMENT_SIZE`. The operation cannot output elements that violate the constraint on the element size.
 
@@ -145,10 +142,10 @@ Split the operand at the given position.  This operation is the exact inverse of
     where n is interpreted as a numeric value
 
 Examples:
-* `0x001122 0 OP_SPLIT -> OP_0 0x001122`
-* `0x001122 1 OP_SPLIT -> 0x00 0x1122`
-* `0x001122 2 OP_SPLIT -> 0x0011 0x22`
-* `0x001122 3 OP_SPLIT -> 0x001122 OP_0`
+* `{0x00, 0x11, 0x22} 0 OP_SPLIT -> OP_0 {0x00, 0x11, 0x22}`
+* `{0x00, 0x11, 0x22} 1 OP_SPLIT -> {0x00} {0x11, 0x22}`
+* `{0x00, 0x11, 0x22} 2 OP_SPLIT -> {0x00, 0x11} {0x22}`
+* `{0x00, 0x11, 0x22} 3 OP_SPLIT -> {0x00, 0x11, 0x22} OP_0`
 
 Notes:
 * this operator has been introduced as a replacement for the previous `OP_SUBSTR`, `OP_LEFT`and `OP_RIGHT`. All three operators can be
@@ -370,6 +367,7 @@ Unit tests:
     Opcode (hex): 0x81
 
 Convert the numeric value into a byte sequence of a certain size, taking account of the sign bit.
+The byte sequence produced uses the little-endian encoding.
 
     `n m OP_NUM2BIN -> x`
     
@@ -378,8 +376,8 @@ Convert the numeric value into a byte sequence of a certain size, taking account
 See also `OP_BIN2NUM`.
 
 Examples:
-* `0x02 4 OP_NUM2BIN -> 0x00000002`
-* `0x85 4 OP_NUM2BIN -> 0x80000005`
+* `2 4 OP_NUM2BIN -> {0x02, 0x00, 0x00, 0x00}`
+* `-5 4 OP_NUM2BIN -> {0x05, 0x00, 0x00, 0x80}`
 
 The operator must fail if:
 1. `n` or `m` are not numeric values.
@@ -393,9 +391,9 @@ Impact of successful execution:
 
 Unit tests:
 1. `n m OP_NUM2BIN -> failure` where `!isnum(n)` or `!isnum(m)`. Both operands must be numeric values.
-2. `0x0100 1 OP_NUM2BIN -> failure`. Trying to produce a byte sequence which is smaller than the minimum size needed to 
+2. `256 1 OP_NUM2BIN -> failure`. Trying to produce a byte sequence which is smaller than the minimum size needed to
    contain the numeric value.
-3. `0x01 (MAX_SCRIPT_ELEMENT_SIZE+1) OP_NUM2BIN -> failure`. Trying to produce an array which is too large.
+3. `1 (MAX_SCRIPT_ELEMENT_SIZE+1) OP_NUM2BIN -> failure`. Trying to produce an array which is too large.
 4. other valid parameters with various results
 
 ## Reference implementation
